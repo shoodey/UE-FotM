@@ -2,7 +2,6 @@ import os
 import time
 
 import requests
-import schedule
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
@@ -12,7 +11,8 @@ unreal_store_url = "https://www.unrealengine.com/marketplace/en-US/assets?tag=49
 thumbnail_url = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png"
 
 # Logging
-log_file = os.path.join(os.path.dirname(__file__), "../", "output.log")
+log_file = os.path.join(os.path.dirname(__file__), "../logs", "output.log")
+dates_file = os.path.join(os.path.dirname(__file__), "../logs", "dates.log")
 
 
 def write_log(message):
@@ -80,27 +80,10 @@ def send_webhook(url, data):
     write_log("Webhook sent")
 
 
-# The job to be executed on a schedule
-def run():
-    # Only run on the first Tuesday of every month
-    if time.strftime("%d") > 7:
-        return
-
-    with open(log_file, "w") as f:
-        pass
-
+def main():
     write_log(time.strftime("%Y-%m-%d %H:%M:%S"))
     asset_data = scrape(unreal_store_url)
     send_webhook(os.getenv("DISCORD_WEBHOOK_URL"), asset_data)
-
-
-# Main function
-# Schedules the job to run every Tuesday at 9:00 AM
-def main():
-    schedule.every().tuesday.at("09:00").do(run)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
 
 
 if __name__ == "__main__":
